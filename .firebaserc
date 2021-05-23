@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "oriontek-prueba": {
+      "hosting": {
+        "PruebaTecnica": [
+          "oriontek-prueba"
+        ]
+      }
+    }
+  }
+}
