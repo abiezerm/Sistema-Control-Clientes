@@ -49,6 +49,7 @@
             >Nombre Completo</label
           >
           <input
+            [(ngModel)]="user.fullName"
             type="text"
             placeholder="Ej: Ymanol Martínez Castillo"
             autofocus
@@ -72,6 +73,7 @@
           <input
             type="email"
             id="email"
+            [(ngModel)]="user.email"
             placeholder="Ej: ymanolcastillo@gmail.com"
             class="
               px-4
@@ -93,6 +95,7 @@
             >
           </div>
           <input
+            [(ngModel)]="user.password"
             type="password"
             placeholder="Ej: Wsaqw123#@"
             id="password"

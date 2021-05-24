@@ -18,16 +18,16 @@ export class AuthService {
   user = {} as User;
 
   constructor(
-    public auth: AngularFireAuth,
-    private db: AngularFirestore,
-    private router: Router
+    public _auth: AngularFireAuth,
+    private _db: AngularFirestore,
+    private _router: Router
   ) {
-    this.user$ = this.auth.authState.pipe(
+    this.user$ = this._auth.authState.pipe(
       switchMap((user) => {
         if (user) {
           this.UserId = user.uid;
           this.userLogeedin = true;
-          return this.db.doc<User>(`Users/${user.uid}`).valueChanges();
+          return this._db.doc<User>(`Users/${user.uid}`).valueChanges();
         } else {
           console.log('no logeado');
           return of(null);
@@ -44,7 +44,7 @@ export class AuthService {
   //Insert the user data into a collection
   InsertData(userCredentials: firebase.default.auth.UserCredential) {
     console.log(this.newUser);
-    return this.db.doc(`Users/${userCredentials.user.uid}`).set({
+    return this._db.doc(`Users/${userCredentials.user.uid}`).set({
       uid: userCredentials.user.uid,
       email: userCredentials.user.email,
       fullName: this.newUser.fullName,
@@ -54,70 +54,56 @@ export class AuthService {
   //Create Account
   async createAccount(user) {
     try {
-      await this.auth
+      await this._auth
         .createUserWithEmailAndPassword(user.email, user.password)
         .then((user) => {
           if (user) {
             this.newUser.uid = user.user.uid;
             this.InsertData(user);
-            // this.VerificationCode();
-            // this.router.navigateByUrl('/verification-email');
+            this._router.navigateByUrl('/login');
           }
-
           return user;
         });
     } catch (e) {
       const errorCodes = e.code;
       switch (errorCodes) {
         case 'auth/invalid-email':
-        // const invalidEmail = await this.Toast.create({
-        //   message: 'Dirección de correo inválida',
-        //   duration: 3000,
-        // });
-        // invalidEmail.present();
-        // break;
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Dirección de correo inválida',
+          });
         case 'auth/email-already-in-use':
-        // const emailInUse = await this.Toast.create({
-        //   message: 'Correo en uso',
-        //   duration: 3000,
-        // });
-        // emailInUse.present();
-        // break;
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Dirección de correo en uso',
+          });
+          break;
+        case 'auth/weak-password':
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'La contraseña debe tener al menos 6 caractéres',
+          });
+          break;
       }
     }
   }
 
   //Create user User
   CreateUser() {
-    return this.db.doc(`Users/${this.newUser.uid}`).set({
+    return this._db.doc(`Users/${this.newUser.uid}`).set({
       uid: this.newUser.uid,
     });
   }
   //Log into the account
   async LoginAccount(email, password) {
     try {
-      const user = await this.auth.signInWithEmailAndPassword(email, password);
-      // if (user && user.user.emailVerified) {
-      // Signed in
-      this.router.navigateByUrl('/home');
-      // }
-      // if (user && user.user.emailVerified) {
-      //   // Signed in
-      //   //console.log(this.user$.subscribe(x=> x.username))
-      //   console.log(user.user.emailVerified);
-      //   const Login = await this.Toast.create({
-      //     message: "Iniciando sesión en su cuenta",
-      //     duration: 2500,
-      //   });
-      //   Login.present();
-      //   this.router.navigateForward("/tabs/tab1");
+      const user = await this._auth.signInWithEmailAndPassword(email, password);
 
-      // ...
-      // } else if (user) {
-      //   console.log(user.user.emailVerified);
-
-      //   this.router.navigateByUrl(["/verification-email"]);
-      // }
+      // User Loged in
+      this._router.navigateByUrl('/home');
     } catch (e) {
       const errorCodes = e.code;
       switch (errorCodes) {
@@ -149,7 +135,7 @@ export class AuthService {
   //Logout the account
   async onLogout() {
     this.userLogeedin = false;
-    await this.auth.signOut();
-    this.router.navigateByUrl('');
+    await this._auth.signOut();
+    this._router.navigateByUrl('');
   }
 }
