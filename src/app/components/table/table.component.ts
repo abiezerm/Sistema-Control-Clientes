@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AngularFireAuth } from '@angular/fire/auth';
 import { Client } from 'src/app/_models/client';
 import { ClientService } from 'src/app/_services/client.service';
 import Swal from 'sweetalert2';
@@ -14,11 +15,18 @@ export class TableComponent implements OnInit {
   client: Client;
   direction: string;
   editBtn: boolean = false;
-  constructor(private _clientService: ClientService) {}
+  constructor(
+    private _clientService: ClientService,
+    public auth: AngularFireAuth
+  ) {}
 
   ngOnInit(): void {
-    this._clientService.getClients().subscribe((clients) => {
-      this.clients = clients;
+    this.auth.authState.subscribe((x) => {
+      if (x) {
+        this._clientService.getClients().subscribe((clients) => {
+          this.clients = clients;
+        });
+      }
     });
   }
 
